@@ -131,6 +131,7 @@ footer{padding:30px 5vw 40px;color:#666c88;font-size:13px;text-align:center;bord
 .cc{text-decoration:none;gap:8px;transition:border-color .3s,transform .3s}.cc:hover{border-color:var(--gold);transform:translateY(-3px)}
 .cc svg{width:28px;fill:none;stroke:var(--gold2);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.cc span{color:var(--dim);font-size:14px}.cc b{font-size:17px;word-break:break-all}
 footer a{color:var(--dim)}
+#dlcount{font-weight:400}
 .x2{margin-left:.3em}html{scroll-padding-top:76px}
 @media(max-width:860px){.ways,.cg{grid-template-columns:1fr}.hb{justify-content:center}.pin .hs{width:40px;height:40px;margin:-20px 0 0 -20px}.gs{gap:20px}.sup,.ct{padding:4vh 5vw 2vh}}
 @media(max-width:860px){.hero{overflow-x:clip}.cta{overflow-x:clip}}
@@ -343,17 +344,21 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)au.pause();
 ui();start()})();
 </script>
 <script>
-/* Счётчик скачиваний APK (Cloudflare Worker) */
+/* Счётчик скачиваний APK: берём download_count из релизов GitHub (воркер не нужен) */
 (()=>{
-const API='https://abplayer-counter.artcomplex.workers.dev';
-const out=document.getElementById('dlcount'),apk=document.getElementById('apk');
+const START=51;     /* число, с которого начинаем */
+const BASELINE=0;   /* сколько скачиваний GitHub уже насчитал на момент запуска счётчика */
+const API='https://api.github.com/repos/brandmauer/brandmauer.github.io/releases?per_page=100';
+const out=document.getElementById('dlcount');
 if(!out)return;
-const show=n=>{if(Number.isFinite(n))out.textContent=n.toLocaleString('ru-RU')};
-fetch(API+'/count').then(r=>r.json()).then(d=>show(d.count)).catch(()=>{});
-if(apk)apk.addEventListener('click',()=>{
-  /* ссылка не перехватывается: скачивание идёт как обычно, запрос к воркеру уходит параллельно */
-  fetch(API+'/hit',{method:'POST',keepalive:true}).then(r=>r.json()).then(d=>show(d.count)).catch(()=>{});
-});
+const show=n=>{out.textContent=(START+Math.max(0,n-BASELINE)).toLocaleString('ru-RU')};
+const total=rels=>rels.reduce((t,r)=>t+(r.assets||[]).filter(a=>a.name==='abplayer.apk').reduce((x,a)=>x+a.download_count,0),0);
+try{const c=JSON.parse(localStorage.getItem('dlc')||'null');
+  if(c&&Date.now()-c.t<6e5){show(c.n);return}}catch(e){}
+fetch(API).then(r=>r.json()).then(d=>{
+  const n=total(d);show(n);
+  try{localStorage.setItem('dlc',JSON.stringify({t:Date.now(),n}))}catch(e){}
+}).catch(()=>{});
 })();
 </script>
 </body></html>
