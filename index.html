@@ -222,7 +222,7 @@ footer a{color:var(--dim)}
 <p class="soon" style="position:relative"><b>Скоро в Google Play.</b> Мы готовим публикацию ABPlayer в магазине — как только она пройдёт проверку, кнопка станет активной. А пока приложение можно скачать файлом прямо с сайта.</p>
 <div class="hb" style="position:relative;justify-content:center">
 <a class="btn o gp" href="#dl" aria-disabled="true" title="Скоро в Google Play"><svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9z" fill="currentColor"/></svg>Скачать из Play Store</a>
-<a class="btn" href="https://github.com/brandmauer/brandmauer.github.io/releases/latest/download/abplayer.apk" download>Скачать с сайта</a>
+<a class="btn" id="apk" href="https://github.com/brandmauer/brandmauer.github.io/releases/latest/download/abplayer.apk" download>Скачать с сайта</a>
 <a class="btn o" href="#support">Поддержать разработчика</a></div>
 <p class="meta" style="position:relative">Android 7.1 и новее · версия 1.0.2 · интернет нужен только для радио</p></section>
 
@@ -246,7 +246,7 @@ footer a{color:var(--dim)}
 <a class="cc" href="https://github.com/brandmauer" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 5l-4 14"/></svg><span>GitHub</span><b>github.com/brandmauer</b></a>
 <a class="cc" href="https://t.me/abplayerbot" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M21 4L3 11l6 2 2 6 3-4 5 4z"/><path d="M9 13l12-9"/></svg><span>Telegram-бот поддержки</span><b>t.me/abplayerbot</b></a></div></section>
 
-<footer>ABPlayer · плеер для аудиокниг на Android</footer>
+<footer>ABPlayer · плеер для аудиокниг на Android · Скачиваний: <b id="dlcount">51</b></footer>
 
 <audio id="bgm" src="audio/ambient.mp3" loop preload="auto"></audio>
 <script>
@@ -341,5 +341,19 @@ setInterval(()=>{if(muted||au.paused)return;prog=Math.min(RAMP,prog+TICK);f=Math
 sb.addEventListener('click',e=>{e.stopPropagation();muted=!muted;try{localStorage.setItem('abp-mute',muted?'1':'0')}catch(x){}if(muted){au.pause();f=0}else start();ui()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)au.pause();else if(ok)start()});
 ui();start()})();
+</script>
+<script>
+/* Счётчик скачиваний APK (Cloudflare Worker) */
+(()=>{
+const API='https://abplayer-counter.artcomplex.workers.dev';
+const out=document.getElementById('dlcount'),apk=document.getElementById('apk');
+if(!out)return;
+const show=n=>{if(Number.isFinite(n))out.textContent=n.toLocaleString('ru-RU')};
+fetch(API+'/count').then(r=>r.json()).then(d=>show(d.count)).catch(()=>{});
+if(apk)apk.addEventListener('click',()=>{
+  /* ссылка не перехватывается: скачивание идёт как обычно, запрос к воркеру уходит параллельно */
+  fetch(API+'/hit',{method:'POST',keepalive:true}).then(r=>r.json()).then(d=>show(d.count)).catch(()=>{});
+});
+})();
 </script>
 </body></html>
