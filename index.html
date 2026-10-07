@@ -347,7 +347,7 @@ let g=$$('#gs .hl').filter(h=>vis(h)&&!h.querySelector('.hs.pu'));if(g.length>1&
 if(g.length){const h=g[Math.random()*g.length|0],hs=[...h.querySelectorAll('.hs')];lastG=h;if(hs.length)fire(hs[Math.random()*hs.length|0])}
 },1000)}
 /* ambient music: starts silent, rises very slowly */
-(function(){const au=$('#bgm'),sb=$('#snd'),TARGET=.1,RAMP=300000,TICK=400;let muted=false,prog=0,f=0,g=null,ok=false;
+(function(){const au=$('#bgm'),sb=$('#snd'),TARGET=.2,RAMP=60000,TICK=400;let muted=false,prog=0,f=0,g=null,ok=false;
 try{muted=localStorage.getItem('abp-mute')=='1'}catch(e){}
 au.volume=.5;if(au.volume!==.5){try{const c=new(window.AudioContext||window.webkitAudioContext)();g=c.createGain();g.gain.value=0;c.createMediaElementSource(au).connect(g);g.connect(c.destination);g.ctx=c}catch(e){}}
 const setV=v=>{if(g)g.gain.value=v;else au.volume=Math.max(0,Math.min(1,v))};setV(0);
